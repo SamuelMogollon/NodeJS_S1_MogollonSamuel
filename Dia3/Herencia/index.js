@@ -23,7 +23,7 @@ contexto.
 
 */
 //const Animal = require('./models/Animal');
-const Perro = require('./models/Perro');
+const Perro = require('./Herencia/models/Perro');
 let perro = new Perro("Paco");
 let perro2 = new Perro("Oreo");
 console.log(perro.nombre);
