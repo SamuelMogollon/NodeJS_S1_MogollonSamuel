@@ -20,21 +20,63 @@ export function registrarGasto() {
         montoGasto,
         categoriaGasto,
         descripcionGasto,
-        fechaGasto: dayjs().format("DD/MM/YYYY")
+        fechaGasto
     });
 
     console.log("Gasto registrado con éxito");
 }
 
 export function listarGastos() {
-  console.clear();
-  console.log("Lista de gastos");
-  console.log("--------------------------------");
+    console.log("=============================================");
+    console.log("               Lista de gastos");
+    console.log("=============================================");
 
-  if (dataSave.length === 0) {
-    console.log("No hay gastos registrados");
-    return;
-  }
+    if (dataSave.length === 0) {
+        console.log("No hay gastos registrados");
+        return;
+    }
 
-  console.table(dataSave);
+    console.table(dataSave);
+}
+
+export function calcularGastos() {
+    if (dataSave.length === 0) {
+        console.log("No hay gastos registrados todavía.");
+        return;
+    }
+
+    let total = 0;
+
+    for (let i = 0; i < dataSave.length; i++) {
+        total += Number(dataSave[i].montoGasto);
+    }
+
+    console.log("=============================================");
+    console.log("              Total de Gastos                ");
+    console.log("=============================================");
+    console.log(`Total gastado: $${total}`);
+    console.log("=============================================");
+}
+
+export function reporteGastos() {
+    if (dataSave.length === 0) {
+        console.log("No hay gastos registrados todavía.");
+        return;
+    }
+
+    console.log("=============================================");
+    console.log("            Reporte de Gastos                ");
+    console.log("=============================================");
+
+    for (let i = 0; i < dataSave.length; i++) {
+        const gasto = dataSave[i];
+        console.log(`Gasto #${i + 1}`);
+        console.log(`  Fecha:        ${gasto.fechaGasto}`);
+        console.log(`  Monto:        $${gasto.montoGasto}`);
+        console.log(`  Categoría:    ${gasto.categoriaGasto}`);
+        console.log(`  Descripción:  ${gasto.descripcionGasto}`);
+        console.log("---------------------------------------------");
+    }
+
+    console.log("Fin del reporte.");
 }
