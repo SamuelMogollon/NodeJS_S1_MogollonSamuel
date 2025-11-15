@@ -1,6 +1,8 @@
 import PromptSync from "prompt-sync";
-import { registrarGasto, listarGastos, calcularGastos, reporteGastos } from "./controllers/controllers.js";
+import { registrarGasto, listarGastos, calcularGastos, reporteGastos, actualizarGastos, eliminarGasto } from "./controllers/controllers.js";
+import { testConnection } from "./db.js";
 
+const db = await testConnection();
 const prompt = PromptSync()
 
 let programaEnFuncionamiento = true;
@@ -21,13 +23,20 @@ while (programaEnFuncionamiento) {
     const opcion = Number(prompt("Elige una opción:  "));
 
     if (opcion === 1) {
-        registrarGasto();
+        await registrarGasto(db);
     } else if (opcion === 2) {
-        listarGastos();
+        await listarGastos(db);
     } else if (opcion === 3) {
-        calcularGastos();
+        await calcularGastos(db);
     } else if (opcion === 4) {
-        reporteGastos();
+        await reporteGastos(db);
+    } else if (opcion === 5) {
+        await actualizarGastos(db);
+    } else if (opcion === 6) {
+        await eliminarGasto(db);
+    } else if (opcion === 7) {
+        console.log("Hasta Prontooo")
+        programaEnFuncionamiento = false;
     } else {
         console.log("Opción inválida");
     }

@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "dayjs": "^1.11.19",
+    "mongodb": "^7.0.0",
     "prompt-sync": "^4.2.0"
   }
 }

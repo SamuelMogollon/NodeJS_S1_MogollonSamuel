@@ -1,10 +1,10 @@
 import PromptSync from "prompt-sync";
 import dayjs from "dayjs";
+import { db } from "../db.js";
 
 const prompt = PromptSync();
-let dataSave = [];
 
-export function registrarGasto() {
+export async function registrarGasto(db) {
     console.log("- Monto del gasto:");
     const montoGasto = parseFloat(prompt("> "));
 
@@ -16,7 +16,7 @@ export function registrarGasto() {
 
     const fechaGasto = dayjs().format("DD/MM/YYYY");
 
-    dataSave.push({
+    await db.collection("gastos").insertOne({
         montoGasto,
         categoriaGasto,
         descripcionGasto,
@@ -26,29 +26,34 @@ export function registrarGasto() {
     console.log("Gasto registrado con éxito");
 }
 
-export function listarGastos() {
+export async function listarGastos(db) {
+
     console.log("=============================================");
     console.log("               Lista de gastos");
     console.log("=============================================");
 
-    if (dataSave.length === 0) {
+    const gastos = await db.collection("gastos").find().toArray();
+
+    if (gastos.length === 0) {
         console.log("No hay gastos registrados");
         return;
     }
 
-    console.table(dataSave);
+    console.table(gastos);
 }
 
-export function calcularGastos() {
-    if (dataSave.length === 0) {
+export async function calcularGastos(db) {
+    const gastos = await db.collection("gastos").find().toArray();
+
+    if (gastos.length === 0) {
         console.log("No hay gastos registrados todavía.");
         return;
     }
 
     let total = 0;
 
-    for (let i = 0; i < dataSave.length; i++) {
-        total += Number(dataSave[i].montoGasto);
+    for (let i = 0; i < gastos.length; i++) {
+        total += Number(gastos[i].montoGasto);
     }
 
     console.log("=============================================");
@@ -58,8 +63,10 @@ export function calcularGastos() {
     console.log("=============================================");
 }
 
-export function reporteGastos() {
-    if (dataSave.length === 0) {
+export async function reporteGastos(db) {
+    const gastos = await db.collection("gastos").find().toArray();
+
+    if (gastos.length === 0) {
         console.log("No hay gastos registrados todavía.");
         return;
     }
@@ -68,15 +75,97 @@ export function reporteGastos() {
     console.log("            Reporte de Gastos                ");
     console.log("=============================================");
 
-    for (let i = 0; i < dataSave.length; i++) {
-        const gasto = dataSave[i];
-        console.log(`Gasto #${i + 1}`);
+    gastos.forEach((gasto, index) => {
+        console.log(`Gasto #${index + 1}`);
         console.log(`  Fecha:        ${gasto.fechaGasto}`);
         console.log(`  Monto:        $${gasto.montoGasto}`);
         console.log(`  Categoría:    ${gasto.categoriaGasto}`);
         console.log(`  Descripción:  ${gasto.descripcionGasto}`);
-        console.log("---------------------------------------------");
-    }
+        console.log("=============================================");
+    });
 
     console.log("Fin del reporte.");
+}
+
+export async function actualizarGastos(db) {
+    const gastos = await db.collection("gastos").find().toArray();
+
+    if (gastos.length === 0) {
+        console.log("No hay gastos para actualizar.");
+        return;
+    }
+
+    console.log("=== Lista de Gastos ===");
+    gastos.forEach((gasto, index) => {
+        console.log(`Gasto #${index + 1}`);
+        console.log(`  Fecha:        ${gasto.fechaGasto}`);
+        console.log(`  Monto:        $${gasto.montoGasto}`);
+        console.log(`  Categoría:    ${gasto.categoriaGasto}`);
+        console.log(`  Descripción:  ${gasto.descripcionGasto}`);
+        console.log("=============================================");
+    });
+
+    const index = Number(prompt("Elige el número del gasto que quieres actualizar: "));
+
+    if (isNaN(index) || index < 1 || index > gastos.length) {
+        console.log("Opción inválida.");
+        return;
+    }
+
+    const gasto = gastos[index - 1];
+
+    console.log("Nuevo monto:");
+    const nuevoMonto = parseFloat(prompt("> "));
+
+    console.log("Nueva categoría:");
+    const nuevaCategoria = prompt("> ");
+
+    console.log("Nueva descripción:");
+    const nuevaDescripcion = prompt("> ");
+
+    await db.collection("gastos").updateOne(
+        { _id: gasto._id },
+        {
+            $set: {
+                montoGasto: nuevoMonto,
+                categoriaGasto: nuevaCategoria,
+                descripcionGasto: nuevaDescripcion
+            }
+        }
+    );
+
+    console.log("Gasto actualizado con éxito.");
+}
+
+export async function eliminarGasto(db) {
+    const gastos = await db.collection("gastos").find().toArray();
+
+    if (gastos.length === 0) {
+        console.log("No hay gastos para eliminar.");
+        return;
+    }
+
+    console.log("=============================================");
+    console.log("               Lista de gastos");
+    console.log("=============================================");
+
+    if (gastos.length === 0) {
+        console.log("No hay gastos registrados");
+        return;
+    }
+
+    console.table(gastos);
+
+    const index = Number(prompt("Elige el número del gasto que quieres eliminar: "));
+
+    if (isNaN(index) || index < 1 || index > gastos.length) {
+        console.log("Opción inválida.");
+        return;
+    }
+
+    const gastoAEliminar = gastos[index - 1];
+
+    await db.collection("gastos").deleteOne({ _id: gastoAEliminar._id });
+
+    console.log("Gasto eliminado con éxito.");
 }
